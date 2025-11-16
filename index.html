@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>프롬프트 실험 설문 화면 미리보기</title>
+    <!-- Tailwind CDN (디자인용) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="min-h-screen w-full p-4 md:p-6 flex flex-col gap-4">
+      <!-- 상단 헤더 + 화면 전환 버튼 (연구자용 미리보기 전용) -->
+      <header class="flex flex-col gap-2 mb-2">
+        <h1 class="text-2xl font-bold">프롬프트 실험 설문 화면 미리보기</h1>
+        <p class="text-sm text-slate-600">
+          실제 설문에서는 참가자가 세 화면 중 하나만 보게 되며, 여기서는 연구자가 전체 구성을 한눈에 확인할 수 있습니다.
+        </p>
+
+        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-600 mr-1">화면 선택</span>
+          <div class="inline-flex rounded-full bg-slate-100 p-1 border border-slate-200">
+            <button
+              data-screen-btn="screen1"
+              class="screen-btn px-3 py-1 rounded-full font-medium transition-all bg-white shadow-sm text-slate-900"
+            >
+              화면 1 (대조)
+            </button>
+            <button
+              data-screen-btn="screen2"
+              class="screen-btn px-3 py-1 rounded-full font-medium transition-all text-slate-500"
+            >
+              화면 2 (가이드 A)
+            </button>
+            <button
+              data-screen-btn="screen3"
+              class="screen-btn px-3 py-1 rounded-full font-medium transition-all text-slate-500"
+            >
+              화면 3 (가이드 B)
+            </button>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-1">
+          ※ 모바일에서는 세로 하나의 열로, PC에서는 섹션이 2~3열로 자연스럽게 재배치되도록 설계된 레이아웃입니다.
+        </p>
+      </header>
+
+      <!-- 공통: 설문 전체 흐름 요약 카드 -->
+      <section class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+        <h2 class="text-lg font-semibold">전체 설문 흐름</h2>
+        <p class="text-xs text-slate-600">
+          네 단계로 구성된 흐름은 세 화면(조건) 모두 동일하며, 제시되는 정보와 안내만 다르게 구성됩니다.
+        </p>
+        <ol
+          class="list-decimal list-inside text-xs text-slate-800 space-y-1 bg-slate-50 rounded-xl p-3 border border-slate-100"
+        >
+          <li>기본 정보 + 현재 AI 활용 능력 측정 (사전 문항 Q1~Q19)</li>
+          <li>목표 이미지 확인: 책상 위에 펼쳐진 작은 미니어처 공원</li>
+          <li>이미지 생성 프롬프트 작성 및 실행 (화면별 구성 차이)</li>
+          <li>향상된 능력 재측정 + 과제 평가 + 소감 (사후 Q21~Q36)</li>
+        </ol>
+      </section>
+
+      <!-- 화면 1: 대조군 (가이드 없음) -->
+      <main id="screen1" class="flex flex-col gap-4">
+        <!-- 목표 이미지 안내 -->
+        <section class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+          <h3 class="text-sm font-semibold text-slate-800">1) 목표 이미지 안내</h3>
+          <p class="text-xs text-slate-600">
+            아래와 같은 느낌의 이미지를 만드는 것이 이번 과제의 목표입니다. 이미지는 예시일 뿐이며, 비슷한 분위기라면
+            충분합니다.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div
+              class="aspect-video rounded-xl bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+            >
+              책상 위에 작은 공원이 놓인 예시 이미지 자리
+            </div>
+            <ul
+              class="list-disc list-inside text-[11px] text-slate-700 space-y-1 bg-slate-50 rounded-xl p-3 border border-slate-100"
+            >
+              <li>책상 위에 올라간 작은 공원</li>
+              <li>작은 나무, 벤치, 길, 사람 등 요소 포함 가능</li>
+              <li>실제와 비슷한 느낌 또는 장난감 느낌 모두 허용</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 프롬프트 작성 + 실행 -->
+        <section
+          class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)] gap-4 items-start"
+        >
+          <div class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+            <h3 class="text-sm font-semibold text-slate-800">2) 프롬프트 작성</h3>
+            <p class="text-xs text-slate-600">
+              가지고 계신 AI 도구에서 사용하듯이, 이미지 생성을 위해 입력하고 싶은 문장을 자유롭게 작성해 주세요.
+            </p>
+            <textarea
+              id="prompt1"
+              class="w-full min-h-[120px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              placeholder="예: 책상 위에 작은 공원이 있는 이미지를 만들어줘..."
+            ></textarea>
+            <button
+              class="run-btn self-start mt-1 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-medium shadow hover:bg-indigo-700"
+              data-result="result1a"
+            >
+              실행하기
+            </button>
+            <p class="text-[10px] text-slate-500">
+              ※ 실제 구현 시 이 버튼을 이미지 생성 API와 연결하여, 아래 미리보기 영역에 결과를 바로 보여줄 수 있습니다.
+            </p>
+          </div>
+
+          <!-- 결과 미리보기 -->
+          <div class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3 text-xs">
+            <h3 class="text-sm font-semibold text-slate-800">3) 결과 미리보기</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                class="border border-slate-200 rounded-xl p-2 bg-slate-50 flex flex-col gap-1"
+              >
+                <p class="font-medium text-[11px] text-slate-700 mb-1">첫 시도</p>
+                <div
+                  id="result1a"
+                  class="aspect-video rounded-lg bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+                >
+                  첫 실행 결과 이미지 자리
+                </div>
+                <p class="mt-1 text-[10px] text-slate-600 leading-relaxed">
+                  • 참가자가 처음 작성한 프롬프트로 얻은 결과를 표시합니다.
+                </p>
+              </div>
+              <div
+                class="border border-slate-200 rounded-xl p-2 bg-slate-50 flex flex-col gap-1"
+              >
+                <p class="font-medium text-[11px] text-slate-700 mb-1">수정 후 시도</p>
+                <div
+                  id="result1b"
+                  class="aspect-video rounded-lg bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+                >
+                  수정 후 실행 결과 이미지 자리
+                </div>
+                <p class="mt-1 text-[10px] text-slate-600 leading-relaxed">
+                  • 참가자가 스스로 프롬프트를 수정한 뒤 얻은 결과를 비교할 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- 화면 2: 가이드 A (초보자용 예시) -->
+      <main id="screen2" class="hidden flex-col gap-4">
+        <section class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+          <h3 class="text-sm font-semibold text-slate-800">1) 예시 이미지와 안내 (가이드 A)</h3>
+          <p class="text-xs text-slate-600">
+            아래 이미지는 이번 과제의 예시이며, 오른쪽은 이미지를 처음 만드는 분들도 참고할 수 있는 예시 프롬프트입니다.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <!-- 예시 이미지 자리 -->
+            <div
+              class="aspect-video rounded-xl bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+            >
+              책상 위에 놓인 미니어처 공원 예시 이미지 자리
+            </div>
+            <!-- 초보자용 가이드 텍스트 -->
+            <div
+              class="border border-slate-200 rounded-xl p-3 bg-slate-50 overflow-auto max-h-64"
+            >
+              <p class="font-semibold text-slate-800 text-[11px] mb-1">
+                프롬프트 작성 예시 (초보자용)
+              </p>
+              <p class="text-[11px] text-slate-700">
+                이미지를 처음 만들어보는 사람도 따라 하기 쉬운 방식으로 쓴 예시입니다. 전체 구조와 표현 방식을
+                참고만 하시면 됩니다.
+              </p>
+              <pre
+                class="whitespace-pre-wrap bg-white rounded-lg border border-slate-200 p-2 text-[11px] leading-relaxed mt-1"
+              >미니어처 스타일로,
+위에서 내려다본 각도의 책상 위 작은 공원을 만들어줘.
+
+공원에는 작은 벤치, 미니 가로등, 나무와 꽃들,
+산책하는 사람들, 뛰어노는 아이들, 작은 분수대가 있고,
+배경에는 커피잔과 노트북이 흐릿하게 보이게 해줘.
+
+밝은 아침 햇살 아래, 매우 상세하게, 4K 고화질로 표현해줘.</pre>
+              <ul class="list-disc list-inside text-[11px] text-slate-700 space-y-1 mt-2">
+                <li>첫 줄: 전체 느낌(스타일, 시점)을 지정합니다.</li>
+                <li>중간: 공원 안에 무엇이 있는지 나열합니다.</li>
+                <li>마지막: 빛·분위기·해상도 같은 품질을 적어줍니다.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 프롬프트 작성 + 실행 -->
+        <section
+          class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)] gap-4 items-start"
+        >
+          <div class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+            <h3 class="text-sm font-semibold text-slate-800">2) 프롬프트 작성</h3>
+            <p class="text-xs text-slate-600">
+              위 예시를 참고하되, 본인이 만들고 싶은 이미지를 떠올리면서 문장을 작성해 주세요. 그대로 복사할 필요는
+              없습니다.
+            </p>
+            <textarea
+              id="prompt2"
+              class="w-full min-h-[120px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              placeholder="예시를 참고해서, 이미지에 포함하고 싶은 요소들을 문장으로 적어보세요."
+            ></textarea>
+            <button
+              class="run-btn self-start mt-1 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-medium shadow hover:bg-indigo-700"
+              data-result="result2"
+            >
+              실행하기
+            </button>
+            <p class="text-[10px] text-slate-500">
+              ※ 버튼 클릭 시, 추후 이미지 생성 API를 연결하여 오른쪽에 결과를 보여줄 수 있습니다.
+            </p>
+          </div>
+
+          <!-- 결과 미리보기 -->
+          <div class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3 text-xs">
+            <h3 class="text-sm font-semibold text-slate-800">3) 결과 미리보기</h3>
+            <div
+              id="result2"
+              class="aspect-video rounded-lg bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+            >
+              현재 프롬프트 결과 이미지 자리
+            </div>
+            <p class="mt-1 text-[10px] text-slate-600 leading-relaxed">
+              • 안내를 참고해서 작성한 프롬프트의 결과를 이 영역에서 확인합니다.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <!-- 화면 3: 가이드 B (전문가용 예시) -->
+      <main id="screen3" class="hidden flex-col gap-4">
+        <section class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+          <h3 class="text-sm font-semibold text-slate-800">1) 예시 이미지와 안내 (가이드 B)</h3>
+          <p class="text-xs text-slate-600">
+            아래 이미지는 같은 과제의 예시이며, 오른쪽에는 구도·요소·디테일을 더 정교하게 통제하는 예시 프롬프트가
+            제시됩니다.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <!-- 예시 이미지 자리 -->
+            <div
+              class="aspect-video rounded-xl bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+            >
+              책상 위에 놓인 미니어처 공원 예시 이미지 자리
+            </div>
+            <!-- 전문가용 가이드 텍스트 -->
+            <div
+              class="border border-slate-200 rounded-xl p-3 bg-slate-50 overflow-auto max-h-64"
+            >
+              <p class="font-semibold text-slate-800 text-[11px] mb-1">
+                프롬프트 작성 예시 (전문가용)
+              </p>
+              <p class="text-[11px] text-slate-700">
+                구도·요소·디테일을 보다 정교하게 통제하고 싶을 때 쓸 수 있는 예시입니다. 각 줄이 어떤 역할을 하는지
+                보면서 읽어보세요.
+              </p>
+              <pre
+                class="whitespace-pre-wrap bg-white rounded-lg border border-emerald-200 p-2 text-[11px] leading-relaxed mt-1"
+              >미니어처 디오라마 사진 스타일로,
+45도 각도에서 내려다본 책상 위의 작은 공원을 생성해줘.
+
+공원에는 미니 벤치, 작은 가로등, 나무와 화단, 작은 분수,
+놀이터, 연못, 산책하는 사람과 뛰어노는 아이들이 등장하고,
+배경에는 흐릿한 커피잔, 연필꽂이, 노트북이 배치되어 있게 해줘.
+
+밝은 아침 햇살 아래, 매우 상세하고 사실적인 4K 고해상도로 표현하며,
+미니어처의 스케일감과 깊이감을 특히 강조해줘.</pre>
+              <ul class="list-disc list-inside text-[11px] text-slate-700 space-y-1 mt-2">
+                <li>첫 블록: 스타일(디오라마 사진), 각도(45도)를 고정합니다.</li>
+                <li>두 번째 블록: 장면의 구성 요소와 사람의 활동을 구체적으로 지정합니다.</li>
+                <li>세 번째 블록: 빛, 해상도, 강조 포인트(스케일감·깊이감)를 요구합니다.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 프롬프트 작성 + 실행 -->
+        <section
+          class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)] gap-4 items-start"
+        >
+          <div class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+            <h3 class="text-sm font-semibold text-slate-800">2) 프롬프트 작성</h3>
+            <p class="text-xs text-slate-600">
+              위 예시를 참고하되, 실제 연구/수업에서 활용해보고 싶은 수준으로 구도·요소·품질을 의식해서 작성해
+              주세요.
+            </p>
+            <textarea
+              id="prompt3"
+              class="w-full min-h-[120px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              placeholder="구도 → 주요 대상 → 세부 요소 → 배경 → 분위기/품질 순서로 정리해 보세요."
+            ></textarea>
+            <button
+              class="run-btn self-start mt-1 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-medium shadow hover:bg-indigo-700"
+              data-result="result3"
+            >
+              실행하기
+            </button>
+            <p class="text-[10px] text-slate-500">
+              ※ 버튼 클릭 시, 추후 이미지 생성 API를 연결하여 오른쪽에 결과를 보여줄 수 있습니다.
+            </p>
+          </div>
+
+          <!-- 결과 미리보기 -->
+          <div class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3 text-xs">
+            <h3 class="text-sm font-semibold text-slate-800">3) 결과 미리보기</h3>
+            <div
+              id="result3"
+              class="aspect-video rounded-lg bg-slate-200 flex items-center justify-center text-[10px] text-slate-600"
+            >
+              현재 프롬프트 결과 이미지 자리
+            </div>
+            <p class="mt-1 text-[10px] text-slate-600 leading-relaxed">
+              • 보다 구조화된 프롬프트의 결과를 이 영역에서 확인합니다.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <!-- 설문 영역: 구글 폼 임베드 자리 (공통) -->
+      <section class="bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
+        <h2 class="text-lg font-semibold">설문 응답 영역 (Google Form 임베드)</h2>
+        <p class="text-xs text-slate-600">
+          실제 서비스에서는 아래 자리에 구글폼에서 제공하는
+          <span class="font-medium">임베드 코드(iframe)</span>를 그대로 붙여넣으면 응답이 구글 스프레드시트로 자동
+          저장됩니다.
+        </p>
+        <div
+          class="border border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 text-[11px] text-slate-600 flex flex-col gap-2"
+        >
+          <p class="font-medium text-slate-800 text-xs">예시 (임베드 자리)</p>
+          <div
+            class="w-full aspect-[4/3] bg-white rounded-lg border border-slate-200 flex items-center justify-center text-[10px]"
+          >
+            여기 구글 폼 iframe 코드가 들어갑니다.
+          </div>
+          <p class="font-mono text-[10px] break-all bg-white border border-slate-200 rounded-lg p-2">
+&lt;!-- 여기에 본인 설문 링크로 교체 --&gt;
+&lt;iframe
+  src=&quot;https://docs.google.com/forms/d/폼_ID/viewform?embedded=true&quot;
+  width=&quot;100%&quot;
+  height=&quot;800&quot;
+  frameborder=&quot;0&quot;
+  marginheight=&quot;0&quot;
+  marginwidth=&quot;0&quot;
+&gt;로드 중...&lt;/iframe&gt;
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // ⚠️ 여기서 API 키를 정의합니다.
+      // 실제로 클라이언트(브라우저)에 키를 넣으면 노출 위험이 있으니,
+      // 연구용 내부 실험이 아니라면 반드시 서버를 거쳐야 합니다.
+      const OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE"; // ← 여기에 키를 넣는 자리
+
+      // 화면 전환 버튼 동작
+      document.querySelectorAll(".screen-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.getAttribute("data-screen-btn");
+          // 버튼 스타일 초기화
+          document.querySelectorAll(".screen-btn").forEach((b) => {
+            b.classList.remove("bg-white", "shadow-sm", "text-slate-900");
+            b.classList.add("text-slate-500");
+          });
+          btn.classList.add("bg-white", "shadow-sm", "text-slate-900");
+          btn.classList.remove("text-slate-500");
+
+          // 화면 전환
+          ["screen1", "screen2", "screen3"].forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (id === target) {
+              el.classList.remove("hidden");
+              el.classList.add("flex");
+              el.classList.add("flex-col");
+            } else {
+              el.classList.add("hidden");
+              el.classList.remove("flex");
+            }
+          });
+        });
+      });
+
+      // 실행하기 버튼 동작 (현재는 더미 처리)
+      document.querySelectorAll(".run-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const resultId = btn.getAttribute("data-result");
+          if (!resultId) return;
+          const resultBox = document.getElementById(resultId);
+          if (!resultBox) return;
+
+          // 간단히, 같은 섹션 안의 textarea 하나를 찾아서 프롬프트를 읽습니다.
+          const section = btn.closest("section");
+          const textarea = section ? section.querySelector("textarea") : null;
+          const prompt = textarea ? textarea.value.trim() : "";
+
+          if (!prompt) {
+            resultBox.textContent = "프롬프트를 먼저 입력해 주세요.";
+            return;
+          }
+
+          // 아직 API 연동 전: 프롬프트 확인용 더미 텍스트
+          resultBox.textContent =
+            "여기에 이미지가 생성됩니다. (현재는 테스트용 더미 결과)\\n입력한 프롬프트: " +
+            prompt;
+
+          // ▼ 실제로 OpenAI API(예: 이미지 생성)를 호출하고 싶다면,
+          //   아래 예시 코드를 참고해서 연결할 수 있습니다.
+          //   (보안 때문에 실제 서비스에서는 프론트에서 직접 키를 넣지 말고, 서버를 통해 요청해야 합니다.)
+          /*
+          if (!OPENAI_API_KEY || OPENAI_API_KEY === "YOUR_OPENAI_API_KEY_HERE") {
+            console.warn("OPENAI_API_KEY가 설정되지 않았습니다.");
+            return;
+          }
+
+          try {
+            const response = await fetch("https://api.openai.com/v1/images/generations", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + OPENAI_API_KEY,
+              },
+              body: JSON.stringify({
+                model: "gpt-image-1",
+                prompt: prompt,
+                size: "1024x1024",
+              }),
+            });
+
+            const data = await response.json();
+            const imageUrl = data.data[0].url;
+            resultBox.innerHTML = "<img src='" + imageUrl + "' alt='생성된 이미지' class='w-full h-full object-cover rounded-lg' />";
+          } catch (error) {
+            console.error(error);
+            resultBox.textContent = "이미지 생성 중 오류가 발생했습니다.";
+          }
+          */
+        });
+      });
+    </script>
+  </body>
+</html>
