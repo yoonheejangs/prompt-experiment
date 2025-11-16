@@ -2,402 +2,602 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>AI 프롬프트 실험 설문 템플릿</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <title>AI 프롬프트 실험 설문 UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --border: #e5e7eb;
+      --bg: #f6f7fb;
+      --card-bg: #ffffff;
+      --border: #d4d7e2;
       --accent: #4f46e5;
       --accent-soft: #eef2ff;
       --text-main: #111827;
       --text-sub: #6b7280;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
       background: var(--bg);
       color: var(--text-main);
     }
-    .page {
-      min-height: 100vh;
-      padding: 16px;
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    h1, h2, h3 { margin: 0; }
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 15px -10px rgba(15, 23, 42, 0.15);
-      padding: 16px;
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 16px 16px 40px;
     }
-    .muted {
-      font-size: 12px;
+
+    header h1 {
+      font-size: 1.6rem;
+      margin: 0 0 6px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 0.86rem;
       color: var(--text-sub);
     }
-    .pill-group {
-      display: inline-flex;
-      padding: 3px;
+
+    .pill {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
       border-radius: 999px;
       background: #e5e7eb;
-      border: 1px solid #d1d5db;
-      gap: 2px;
+      font-size: 0.75rem;
+      color: #4b5563;
     }
-    .pill-button {
-      border: none;
-      border-radius: 999px;
-      padding: 6px 10px;
-      background: transparent;
-      font-size: 12px;
-      cursor: pointer;
-      transition: 0.15s all;
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 16px 16px 18px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e5e7eb;
+      margin-top: 14px;
+    }
+
+    .card h2, .card h3 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+
+    .card p {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
       color: var(--text-sub);
     }
-    .pill-button.active {
+
+    .steps {
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      font-size: 0.8rem;
+    }
+
+    .steps li { margin: 2px 0; }
+
+    /* 탭 버튼 */
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tab-button {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #e5e7eb;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #4b5563;
+    }
+
+    .tab-button.active {
       background: #ffffff;
       color: var(--accent);
-      box-shadow: 0 2px 4px rgba(15,23,42,0.15);
+      border-color: var(--accent);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.18);
+      font-weight: 600;
     }
+
+    .tab-label {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      display: block;
+    }
+
+    .tab-title {
+      font-size: 0.85rem;
+    }
+
+    .tab-content {
+      margin-top: 12px;
+    }
+
+    .hidden { display: none; }
+
+    /* 그리드 */
     .grid {
       display: grid;
       gap: 12px;
     }
     @media (min-width: 768px) {
       .grid-2 {
-        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      }
-      .grid-3 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
       }
     }
-    .img-frame {
-      width: 100%;
-      aspect-ratio: 16/9;
-      border-radius: 14px;
+
+    .img-wrapper {
+      position: relative;
       overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
       background: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--text-sub);
     }
-    .img-frame img {
+
+    .img-wrapper img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
       display: block;
     }
+
+    .img-caption {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
     textarea {
       width: 100%;
       min-height: 120px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
       padding: 8px 10px;
-      font-size: 13px;
+      font-size: 0.8rem;
       resize: vertical;
       background: #f9fafb;
     }
+
     textarea:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
-      background: #ffffff;
+      box-shadow: 0 0 0 2px var(--accent-soft);
     }
+
     .btn-primary {
-      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 7px 14px;
       border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 12px;
+      border: none;
       background: var(--accent);
-      color: #ffffff;
+      color: #fff;
+      font-size: 0.8rem;
       cursor: pointer;
+      margin-top: 6px;
     }
-    .btn-primary:hover {
-      background: #4338ca;
+
+    .btn-primary span {
+      font-size: 0.75rem;
+      opacity: 0.85;
     }
-    pre {
-      white-space: pre-wrap;
+
+    .preview-grid {
+      display: grid;
+      gap: 8px;
+    }
+    @media (min-width: 640px) {
+      .preview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .preview-card {
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
       background: #f9fafb;
-      border-radius: 10px;
-      border: 1px solid var(--border);
       padding: 8px;
-      font-size: 11px;
-      line-height: 1.5;
+      font-size: 0.78rem;
     }
-    .hidden { display: none; }
+
+    .preview-title {
+      font-weight: 600;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+    }
+
+    .preview-box {
+      border-radius: 10px;
+      border: 1px dashed #d4d4d8;
+      background: #e5e7eb;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .preview-note {
+      margin-top: 4px;
+      font-size: 0.73rem;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    /* 구글폼 임베드 박스 */
+    .form-wrapper {
+      margin-top: 10px;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 10px;
+      font-size: 0.78rem;
+    }
+
+    .form-wrapper p {
+      margin: 0 0 6px;
+      font-size: 0.75rem;
+      color: #4b5563;
+    }
+
+    iframe {
+      border: none;
+      border-radius: 10px;
+      background: #fff;
+    }
   </style>
 </head>
-
 <body>
-<div class="page">
+  <div class="page">
+    <header>
+      <h1>AI 이미지 프롬프트 실험 · 설문 UI</h1>
+      <p>
+        세 가지 조건(가이드 없음 / 가이드 A / 가이드 B)을 탭으로 전환하면서
+        실험 화면 구성을 한 번에 확인할 수 있는 템플릿입니다.
+      </p>
+      <span class="pill">현재 단계: <strong>UI 디자인 검토용 (문항·가이드는 예시)</strong></span>
+    </header>
 
-  <!-- 헤더 -->
-  <header>
-    <h1>AI 이미지 프롬프트 실험 · 설문 템플릿</h1>
-    <p class="muted">
-      실제 설문에서는 참여자가 세 화면 중 하나만 보게 됩니다. 이 페이지는 연구자가
-      <strong>대조군 / 가이드 A / 가이드 B</strong> 구성을 한 번에 확인하는 용도입니다.
-    </p>
-  </header>
+    <!-- 전체 설문 흐름 안내 -->
+    <section class="card">
+      <h2>📋 전체 설문 진행 순서 (공통)</h2>
+      <p>
+        아래 네 단계 구조는 세 조건이 모두 동일하며,<br />
+        <strong>3단계에서 제시되는 가이드 유무/내용만 다릅니다.</strong>
+      </p>
+      <ol class="steps">
+        <li>1단계 (5분): 기본 정보 + 현재 AI 활용 능력 측정 (Q1~Q19)</li>
+        <li>2단계 (1분): 목표 이미지 확인 – “책상 위 미니어처 공원”</li>
+        <li>3단계 (7분): 프롬프트를 이용한 AI 이미지 만들기 실습</li>
+        <li>4단계 (7분): 향상된 능력 재측정 + 과제 평가 + 소감 (Q21~Q36)</li>
+      </ol>
+    </section>
 
-  <!-- 설문 시작 안내 (대조군 설명 텍스트 기반) -->
-  <section class="card">
-    <h2>📋 설문 안내</h2>
-    <p class="muted" style="margin-top:4px;">
-      (이 문단은 세 그룹 공통 안내로 사용할 수 있어요. 필요하면 Google Form의 첫 설명에도 같이 넣으면 됩니다.)
-    </p>
-    <p style="font-size:13px; line-height:1.6; margin-top:8px;">
-      안녕하세요! AI 융합교육학을 연구하고 있는 대학원생 장윤희입니다.<br />
-      바쁘신 와중에 귀한 시간을 내어 연구에 참여해주셔서 진심으로 감사합니다.
-    </p>
-    <p style="font-size:13px; line-height:1.6;">
-      본 연구는 생성형 AI를 사용할 때 <strong>여러분의 프롬프트 작성 능력과 AI 활용 능력이
-      어떻게 향상되는지</strong> 알아보기 위한 것입니다. 모든 응답은 익명으로 처리되며,
-      연구 목적 이외에는 사용되지 않습니다.
-    </p>
-
-    <h3 style="font-size:14px; margin-top:10px;">📌 설문 진행 순서 (약 18–20분)</h3>
-    <pre>
-1단계 (5분)  : 기본 정보 + 현재 AI 활용 능력 측정
-2단계 (1분)  : 목표 이미지 확인
-3단계 (7분)  : AI 이미지 만들기 실습
-4단계 (7분)  : 향상된 능력 재측정 + 과제 평가</pre>
-
-    <h3 style="font-size:14px; margin-top:12px;">💡 용어 설명 – “프롬프트”</h3>
-    <p style="font-size:13px; line-height:1.6;">
-      <strong>프롬프트</strong>란, AI에게 원하는 것을 요청할 때 입력하는 명령어나 질문을 말합니다.<br />
-      예) <code>강아지가 공원에서 노는 사진을 만들어줘</code>
-    </p>
-  </section>
-
-  <!-- 2. 목표 이미지 예시 (여기에 당신이 준 이미지 3장을 사용) -->
-  <section class="card">
-    <h2>📸 목표 이미지 예시 – “책상 위에 펼쳐진 작은 미니어처 공원”</h2>
-    <p class="muted" style="margin-top:4px;">
-      똑같이 만들 필요는 없고, 비슷한 느낌이면 충분하다는 안내와 함께 보여주면 됩니다.
-    </p>
-
-    <div class="grid" style="margin-top:10px; gap:10px;">
-      <!-- 🔽🔽🔽 여기 세 곳에 이미지를 넣으면 됩니다. 파일 이름/경로만 맞춰 주세요. -->
-      <div class="img-frame">
-        <!-- 예시 1 -->
-        <!-- /images/mini-park-1.jpg 로 업로드했다면 아래 src 그대로 사용 -->
-        <img src="images/mini-park-1.png" alt="책상 위 미니어처 공원 예시 1" />
-      </div>
-      <div class="img-frame">
-        <!-- 예시 2 -->
-        <img src="images/mini-park-2.png" alt="책상 위 미니어처 공원 예시 2" />
-      </div>
-      <div class="img-frame">
-        <!-- 예시 3 -->
-        <img src="images/mini-park-3.png" alt="책상 위 미니어처 공원 예시 3" />
-      </div>
-      <!-- 🔼🔼🔼 GitHub 저장소 안에 images 폴더를 만들고,
-           위 세 파일 이름과 똑같이 업로드하면 바로 보입니다. -->
-    </div>
-  </section>
-
-  <!-- 3. 화면 선택 (연구자 미리보기용) -->
-  <section class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-      <h2 style="font-size:15px;">🧪 실험 화면 미리보기</h2>
-      <div class="pill-group">
-        <button class="pill-button active" data-screen="screen1">화면 1 · 대조군</button>
-        <button class="pill-button" data-screen="screen2">화면 2 · 가이드 A (초보자)</button>
-        <button class="pill-button" data-screen="screen3">화면 3 · 가이드 B (전문가)</button>
-      </div>
+    <!-- 탭 선택 -->
+    <div class="tab-bar">
+      <button class="tab-button active" data-tab="control">
+        <span class="tab-label">Condition 1</span>
+        <span class="tab-title">가이드 없음 (대조군)</span>
+      </button>
+      <button class="tab-button" data-tab="guideA">
+        <span class="tab-label">Condition 2</span>
+        <span class="tab-title">가이드 A (초보자 가이드)</span>
+      </button>
+      <button class="tab-button" data-tab="guideB">
+        <span class="tab-label">Condition 3</span>
+        <span class="tab-title">가이드 B (전문가 가이드)</span>
+      </button>
     </div>
 
-    <!-- 화면 1: 대조군 -->
-    <div id="screen1" class="screen" style="margin-top:14px;">
-      <div class="grid grid-2">
-        <div>
-          <h3 style="font-size:14px;">1) 목표 이미지 안내</h3>
-          <p class="muted">
-            별도의 프롬프트 가이드는 없이, 목표만 설명하고 바로 실습으로 넘어가는 버전입니다.
-          </p>
-          <div class="img-frame" style="margin-top:6px;">
-            <!-- 대조군 화면에 쓸 예시 이미지는 한 장만 보여줘도 충분 -->
-            <img src="images/mini-park-1.png" alt="대조군 예시 이미지" />
+    <!-- 1️⃣ 가이드 없음 화면 -->
+    <section id="tab-control" class="tab-content">
+      <div class="card">
+        <h2>1. 목표 이미지 안내 (가이드 없음)</h2>
+        <p>
+          참가자는 별도의 프롬프트 가이드를 받지 않고, 아래 예시 이미지를 보고
+          스스로 프롬프트를 작성합니다.
+        </p>
+        <div class="grid grid-2">
+          <div>
+            <div class="img-wrapper">
+              <img src="images/mini-park-1.png" alt="책상 위 미니어처 공원 예시 이미지 1" />
+            </div>
+            <p class="img-caption">
+              예시 이미지 1 – 책상 위에 펼쳐진 작은 공원. (참고용, 그대로 따라 할 필요 없음)
+            </p>
+          </div>
+          <div class="steps">
+            <strong>참가자에게 보이는 안내 문구 예시</strong><br /><br />
+            안녕하세요! 지금부터 AI 이미지 생성 실습을 진행합니다.<br /><br />
+            위 사진처럼 <strong>“책상 위에 펼쳐진 작은 미니어처 공원”</strong>을 만드는 것이 목표입니다.
+            가지고 계신 AI 도구(챗GPT, Gemini 등)에 입력할 문장을 상상해 보세요. <br />
+            <br />
+            <ul>
+              <li>어떤 문장을 쓰면 이런 느낌의 이미지가 나올지 자유롭게 작성합니다.</li>
+              <li>정답은 없습니다. 떠오르는 대로 써보고, 필요하면 한 번 수정해도 좋습니다.</li>
+            </ul>
           </div>
         </div>
-        <div>
-          <h3 style="font-size:14px;">2) 프롬프트 작성 · 실습</h3>
-          <p class="muted">
-            참여자는 평소처럼 AI 도구를 쓴다고 생각하고, 자유롭게 문장을 작성합니다.
-          </p>
-          <textarea id="prompt-control" placeholder="예: 책상 위에 작은 공원이 있는 이미지를 만들어줘..."></textarea>
-          <button class="btn-primary" onclick="runPrompt('control')">실행하기</button>
-          <p class="muted">
-            ※ 지금은 연습용이라 실제 이미지를 만들지 않고, 나중에 OpenAI / Midjourney 등과 연결할 수 있습니다.
-          </p>
+      </div>
+
+      <div class="card">
+        <h2>2. 프롬프트 작성 & 결과 비교 (가이드 없음)</h2>
+        <div class="grid grid-2">
+          <div>
+            <h3>2-1. 프롬프트 입력</h3>
+            <p>
+              참가자가 AI 도구에 입력한 최종 프롬프트를 여기에 복사/붙여넣기 하는 영역입니다.
+              (UI상에서는 단순 텍스트 박스로 보여줌)
+            </p>
+            <textarea placeholder="예: 책상 위에 작은 공원이 있는 이미지를 만들어줘..."></textarea>
+            <button class="btn-primary">
+              프롬프트 실행하기
+              <span>(실제 구현 시 이미지 생성 API와 연결)</span>
+            </button>
+          </div>
+          <div>
+            <h3>2-2. 이미지 결과 미리보기</h3>
+            <div class="preview-grid">
+              <div class="preview-card">
+                <div class="preview-title">첫 시도 결과</div>
+                <div class="preview-box">첫 실행 결과 이미지 자리</div>
+                <p class="preview-note">
+                  참가자가 처음 작성한 프롬프트로 생성한 이미지를 스크린샷으로 넣을 수 있는 공간입니다.
+                </p>
+              </div>
+              <div class="preview-card">
+                <div class="preview-title">수정 후 결과 (선택)</div>
+                <div class="preview-box">수정 후 실행 결과 이미지 자리</div>
+                <p class="preview-note">
+                  참가자가 스스로 문장을 다듬은 뒤 다시 실행했을 때의 이미지를 넣을 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 화면 2: 가이드 A (초보자용) -->
-    <div id="screen2" class="screen hidden" style="margin-top:14px;">
-      <div class="grid grid-2">
-        <div>
-          <h3 style="font-size:14px;">1) 초보자용 프롬프트 예시</h3>
-          <p class="muted">
-            “느낌 → 대상 → 안에 들어갈 것들 → 배경 → 품질” 순서로 한 번에 볼 수 있는 예시입니다.
+      <!-- 구글폼 (대조군) -->
+      <section class="card">
+        <h2>3. 설문 응답 영역 – 가이드 없음 (대조군)</h2>
+        <div class="form-wrapper">
+          <p>
+            아래 구글폼은 <strong>실제 연구에 사용할 설문 구조를 테스트하기 위한 임시 버전</strong>입니다.<br />
+            문항 내용은 추후 수정될 수 있습니다.
           </p>
-          <pre>
-미니어처 스타일로,
-위에서 내려다본 각도의 책상 위 작은 공원을 만들어줘.
+          <iframe
+            src="https://forms.gle/4Dfb532S7nXWzRY39"
+            width="100%"
+            height="900"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+    </section>
+
+    <!-- 2️⃣ 가이드 A (초보자용) -->
+    <section id="tab-guideA" class="tab-content hidden">
+      <div class="card">
+        <h2>1. 목표 이미지 + 초보자 가이드 (A형)</h2>
+        <div class="grid grid-2">
+          <div>
+            <div class="img-wrapper">
+              <img src="images/mini-park-2.png" alt="책상 위 미니어처 공원 예시 이미지 2" />
+            </div>
+            <p class="img-caption">
+              예시 이미지 2 – 시계와 놀이기구가 추가된 미니어처 공원.
+            </p>
+          </div>
+          <div>
+            <h3>단계별 프롬프트 가이드 (초보자)</h3>
+            <p>
+              아래 5단계를 차례대로 채워 넣으면, 자연스럽게 좋은 프롬프트가 완성되도록 구성한 안내입니다.
+              (실제 텍스트는 논문용으로 다듬으면서 수정 가능)
+            </p>
+            <ol class="steps">
+              <li><strong>느낌 정하기</strong> – “미니어처”, “디오라마”, “실제 사진처럼” 등 전체 분위기 먼저 쓰기</li>
+              <li><strong>대상 정하기</strong> – “책상 위의 작은 공원” 등 핵심만 한 문장으로 적기</li>
+              <li><strong>공원 안 요소</strong> – 벤치, 그네, 나무, 꽃, 사람, 아이, 강아지 등 세부 요소 나열</li>
+              <li><strong>책상 주변</strong> – 노트, 연필, 시계 등 배경에 보이는 사물 넣기</li>
+              <li><strong>품질 표현</strong> – “밝은 아침 햇살, 매우 상세하게, 4K 고화질” 등으로 마무리</li>
+            </ol>
+            <p style="font-size:0.78rem;margin-top:6px;"><strong>완성 예시</strong></p>
+            <pre style="white-space:pre-wrap;font-size:0.75rem;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;padding:8px 10px;">
+미니어처 디오라마 스타일로,
+위에서 내려다본 책상 위의 작은 공원을 만들어줘.
 
 공원에는 작은 벤치, 미니 가로등, 나무와 꽃들,
 산책하는 사람들, 뛰어노는 아이들, 작은 분수대가 있고,
-배경에는 커피잔과 노트북이 흐릿하게 보이게 해줘.
+배경에는 노트와 연필, 자명종 시계가 흐릿하게 보이게 해줘.
 
-밝은 아침 햇살 아래, 매우 상세하게, 4K 고화질로 표현해줘.</pre>
-          <ul class="muted" style="list-style:disc; padding-left:16px;">
-            <li>첫 줄: 전체 느낌(미니어처, 시점)</li>
-            <li>중간: 공원 안에 무엇이 있는지 나열</li>
-            <li>마지막: 빛, 분위기, 해상도</li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size:14px;">2) 프롬프트 작성 · 실습</h3>
-          <p class="muted">
-            위 예시를 참고해서, 본인이 원하는 버전으로 문장을 바꿔보게 합니다.
-          </p>
-          <textarea id="prompt-beginner" placeholder="예시 구조를 참고해서, 나만의 문장으로 수정해 보세요."></textarea>
-          <button class="btn-primary" onclick="runPrompt('beginner')">실행하기</button>
-          <p class="muted">
-            ※ 버튼 아래에 “실행 전/후 이미지 비교”를 붙이면, 가이드 효과를 바로 보여줄 수 있습니다.
-          </p>
+밝은 아침 햇살 아래, 매우 상세하게, 4K 고화질로 표현해줘.
+            </pre>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 화면 3: 가이드 B (전문가용) -->
-    <div id="screen3" class="screen hidden" style="margin-top:14px;">
-      <div class="grid grid-2">
-        <div>
-          <h3 style="font-size:14px;">1) 전문가용 프롬프트 예시</h3>
-          <p class="muted">
-            구도·요소·디테일을 세밀하게 조절하는 예시입니다. PECS 요소(간결성·논리성 등) 설명을 곁들여도 좋아요.
+      <div class="card">
+        <h2>2. 프롬프트 작성 & 결과 미리보기 (A형)</h2>
+        <div class="grid grid-2">
+          <div>
+            <h3>2-1. 프롬프트 입력</h3>
+            <p>참가자가 위 가이드를 참고하여 직접 작성하는 영역입니다.</p>
+            <textarea placeholder="가이드의 5단계를 모두 반영해서 문장을 작성해 보세요."></textarea>
+            <button class="btn-primary">
+              프롬프트 실행하기
+              <span>(UI 상에서만 보여지고, 실제 API 연결은 나중에)</span>
+            </button>
+          </div>
+          <div>
+            <h3>2-2. 결과 미리보기</h3>
+            <div class="preview-grid">
+              <div class="preview-card">
+                <div class="preview-title">가이드 적용 후 결과</div>
+                <div class="preview-box">가이드 A 프롬프트 결과 이미지 자리</div>
+                <p class="preview-note">
+                  가이드를 적용했을 때 이미지가 얼마나 더 풍부해지는지 보여주는 비교용 스크린샷을 넣을 수 있습니다.
+                </p>
+              </div>
+              <div class="preview-card">
+                <div class="preview-title">추가 실험 (선택)</div>
+                <div class="preview-box">추가 시도 결과 이미지 자리</div>
+                <p class="preview-note">
+                  예: “사람 수 늘리기”, “놀이터 강조하기” 등 작은 변경을 통해 변화되는 모습을 추가로 보여줄 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 구글폼 (가이드 A) -->
+      <section class="card">
+        <h2>3. 설문 응답 영역 – 가이드 A형</h2>
+        <div class="form-wrapper">
+          <p>
+            아래 구글폼은 <strong>가이드 A(초보자용) 조건</strong>에 해당하는 임시 설문입니다.<br />
+            현재는 문항 구조와 UI 흐름만 확인하는 용도로 사용합니다.
           </p>
-          <pre>
+          <iframe
+            src="https://forms.gle/ty7EuWvkhAqoWQxB9"
+            width="100%"
+            height="900"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+    </section>
+
+    <!-- 3️⃣ 가이드 B (전문가용) -->
+    <section id="tab-guideB" class="tab-content hidden">
+      <div class="card">
+        <h2>1. 목표 이미지 + 전문가 가이드 (B형)</h2>
+        <div class="grid grid-2">
+          <div>
+            <div class="img-wrapper">
+              <img src="images/mini-park-3.png" alt="책상 위 미니어처 공원 예시 이미지 3" />
+            </div>
+            <p class="img-caption">
+              예시 이미지 3 – 구도와 동선이 더 복잡한 미니어처 공원.
+            </p>
+          </div>
+          <div>
+            <h3>전문가용 프롬프트 가이드 (예시)</h3>
+            <p>
+              이미 AI를 자주 사용하는 사람을 대상으로, 프롬프트 품질을 한 단계 끌어올리기 위한 버전입니다.
+            </p>
+            <ol class="steps">
+              <li><strong>스타일 & 카메라</strong> – “미니어처 디오라마 사진”, “45도 각도”, “얕은 심도” 등</li>
+              <li><strong>레이아웃</strong> – 중앙에는 놀이터, 주변에는 산책로, 가장자리에 나무 배치 등 공간 구조 지정</li>
+              <li><strong>행동 디테일</strong> – 그네 타는 아이, 달리는 아이, 강아지 산책하는 사람 등 액션 구체화</li>
+              <li><strong>책상 컨텍스트</strong> – 노트, 펜, 창가, 시계 등 현실 공간과 연결되는 요소</li>
+              <li><strong>렌더링 품질</strong> – “따뜻한 오후 햇살, 사실적인 4K, 부드러운 그림자, 고급 사진 스타일”</li>
+            </ol>
+            <p style="font-size:0.78rem;margin-top:6px;"><strong>완성 예시</strong></p>
+            <pre style="white-space:pre-wrap;font-size:0.75rem;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;padding:8px 10px;">
 미니어처 디오라마 사진 스타일로,
-45도 각도에서 내려다본 책상 위의 작은 공원을 생성해줘.
+45도 각도에서 내려다본 책상 위의 작은 공원 전경을 보여줘.
 
-공원에는 미니 벤치, 작은 가로등, 나무와 화단, 작은 분수,
-놀이터, 연못, 산책하는 사람과 뛰어노는 아이들이 등장하고,
-배경에는 흐릿한 커피잔, 연필꽂이, 노트북이 배치되어 있게 해줘.
+중앙에는 모래 놀이터와 미끄럼틀, 그네가 있고,
+둘레를 따라 둥근 산책로가 이어지며,
+곳곳에 벤치와 작은 나무, 꽃이 배치되어 있게 해줘.
 
-밝은 아침 햇살 아래, 매우 상세하고 사실적인 4K 고해상도로 표현하며,
-미니어처의 스케일감과 깊이감을 특히 강조해줘.</pre>
-          <ul class="muted" style="list-style:disc; padding-left:16px;">
-            <li>1블록: 스타일 + 시점 고정</li>
-            <li>2블록: 장면 구성 요소와 사람의 행동</li>
-            <li>3블록: 빛, 해상도, 강조 포인트(스케일감, 깊이감)</li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size:14px;">2) 프롬프트 작성 · 실습</h3>
-          <p class="muted">
-            전문가들은 이미 AI를 쓰고 있으므로, 스스로 구조를 조정하게 하는 입력창입니다.
-          </p>
-          <textarea id="prompt-expert" placeholder="구도 → 대상 → 세부 요소 → 배경 → 품질 순서로 자신의 프롬프트를 구성해 보세요."></textarea>
-          <button class="btn-primary" onclick="runPrompt('expert')">실행하기</button>
-          <p class="muted">
-            ※ 실제 연구에서는 이 영역의 텍스트를 그대로 복사해 Google Form의 “프롬프트 입력 문항”에 붙여 넣어도 됩니다.
-          </p>
+그네를 타는 아이, 모래놀이를 하는 아이들,
+강아지를 산책시키는 사람, 산책하는 가족들이 자연스럽게 어울리고,
+배경에는 열린 노트와 펜, 창가와 자명종 시계가 부드럽게 보이게 해줘.
+
+따뜻한 오후 햇살 아래, 사실적인 4K 고해상도와
+얕은 심도, 부드러운 그림자를 강조해줘.
+            </pre>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- 4. 설문(구글 폼) 임베드 영역 -->
-  <section class="card">
-    <h2>📝 실제 설문 응답 영역 (Google Form)</h2>
-    <p class="muted">
-      구글폼에서 <strong>“보내기 → &lt;&gt; 임베드”</strong>를 눌러 iframe 코드를 복사한 뒤,
-      아래 iframe 부분을 통째로 교체하면 됩니다.
-    </p>
+      <div class="card">
+        <h2>2. 프롬프트 작성 & 결과 미리보기 (B형)</h2>
+        <div class="grid grid-2">
+          <div>
+            <h3>2-1. 프롬프트 입력</h3>
+            <p>
+              전문가 조건에서는 참가자에게 “논문 예시 수준”의 프롬프트를 목표로 하라고 안내할 수 있습니다.
+            </p>
+            <textarea placeholder="구도·요소·동선·품질을 모두 의식해서, 한 번에 완성도 높은 프롬프트를 작성해 보세요."></textarea>
+            <button class="btn-primary">
+              프롬프트 실행하기
+              <span>(향후 이미지 생성 엔진과 연결 가능)</span>
+            </button>
+          </div>
+          <div>
+            <h3>2-2. 결과 미리보기</h3>
+            <div class="preview-grid">
+              <div class="preview-card">
+                <div class="preview-title">가이드 B 결과</div>
+                <div class="preview-box">가이드 B 프롬프트 결과 이미지 자리</div>
+                <p class="preview-note">
+                  구도·동선까지 컨트롤 한 결과 이미지를 넣고, 가이드 A/대조군과 비교해 볼 수 있습니다.
+                </p>
+              </div>
+              <div class="preview-card">
+                <div class="preview-title">비교용 썸네일 (선택)</div>
+                <div class="preview-box">다른 조건 결과와 나란히 비교하는 작은 썸네일 영역</div>
+                <p class="preview-note">
+                  예: 대조군 / 가이드 A / 가이드 B 이미지를 작은 크기로 한 번에 정리해서 넣을 수도 있습니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div style="margin-top:10px;">
-      <!-- 🔽🔽🔽 여기 iframe을, 실제 Google Form에서 가져온 코드로 바꾸면 됨 -->
-      <iframe
-        src="https://docs.google.com/forms/d/폼_ID를_여기로/preview?embedded=true"
-        width="100%"
-        height="900"
-        frameborder="0"
-        marginheight="0"
-        marginwidth="0"
-      >
-        로드 중…
-      </iframe>
-      <!-- 🔼🔼🔼 Form ID만 실제 설문 링크로 바꿔 주세요. -->
-    </div>
-  </section>
+      <!-- 구글폼 (가이드 B) -->
+      <section class="card">
+        <h2>3. 설문 응답 영역 – 가이드 B형</h2>
+        <div class="form-wrapper">
+          <p>
+            아래 구글폼은 <strong>가이드 B(전문가용) 조건</strong>에 해당하는 임시 설문입니다.<br />
+            마찬가지로 현재는 <strong>UI 흐름 확인용</strong>이며, 최종 문항은 나중에 교체 가능합니다.
+          </p>
+          <iframe
+            src="https://forms.gle/a297svRtGhv7d2c9A"
+            width="100%"
+            height="900"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+    </section>
+  </div>
 
-  <!-- 5. (옵션) OpenAI 같은 API를 나중에 연결하고 싶을 때 메모 -->
-  <section class="card">
-    <h2>🔐 API 키 관련 중요 메모</h2>
-    <ul class="muted" style="list-style:disc; padding-left:18px; font-size:12px;">
-      <li><strong> 추후 설문내용과 가이드가 완성되면 API 키를 넣어서 AI를 호출하는 식으로 진행할 예정이며, 구글폼을 임베딩해서 데이터를 추출할 계획입니다.</li>
-    </ul>
-  </section>
+  <script>
+    // 간단한 탭 전환 스크립트
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const tabContents = {
+      control: document.getElementById("tab-control"),
+      guideA: document.getElementById("tab-guideA"),
+      guideB: document.getElementById("tab-guideB"),
+    };
 
-</div>
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-tab");
 
-<script>
-  // 화면 전환
-  const buttons = document.querySelectorAll(".pill-button");
-  const screens = {
-    screen1: document.getElementById("screen1"),
-    screen2: document.getElementById("screen2"),
-    screen3: document.getElementById("screen3"),
-  };
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
 
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const target = btn.getAttribute("data-screen");
-      buttons.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      Object.keys(screens).forEach((key) => {
-        screens[key].classList.toggle("hidden", key !== target);
+        Object.keys(tabContents).forEach((key) => {
+          tabContents[key].classList.toggle("hidden", key !== target);
+        });
       });
     });
-  });
-
-  // 실행하기 버튼 (지금은 데모용 알림만)
-  function runPrompt(type) {
-    const map = {
-      control: "prompt-control",
-      beginner: "prompt-beginner",
-      expert: "prompt-expert",
-    };
-    const textarea = document.getElementById(map[type]);
-    const text = textarea ? textarea.value.trim() : "";
-    if (!text) {
-      alert("프롬프트를 먼저 입력해 주세요.");
-      return;
-    }
-
-    // ⚠️ 여기서 실제 OpenAI / Stable Diffusion API를 부르고 싶어지더라도
-    // 이 파일 안에 API 키를 직접 적으면 안 됩니다.
-    // 대신, 별도 서버(예: Cloudflare Workers, Vercel serverless 등)를 만들어
-    // 그쪽에서만 키를 사용하게 해야 안전합니다.
-
-    alert("지금은 미리보기 모드라 실제 이미지는 만들지 않고,\n입력한 프롬프트만 확인했습니다.\\n\\n" + text);
-  }
-</script>
-
+  </script>
 </body>
 </html>
-
