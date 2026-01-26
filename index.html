@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptCraft 6.0 - PECS Research Edition</title>
+    <title>PromptCraft 7.5 - PECS Research Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #e2e8f0; }
         .card { background-color: #1e293b; border-radius: 1rem; border: 1px solid #334155; padding: 1.5rem; }
         .btn-primary { background-color: #a3e635; color: #0f172a; font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; }
@@ -55,6 +57,62 @@
         }
         @keyframes bounce-slight { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
+        /* Cursor Animation for AI Typing */
+        .typing-cursor::after {
+            content: '▋';
+            animation: blink 1s step-end infinite;
+            color: #a3e635;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Battle Mode Styles */
+        .battle-card { background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; }
+        .vs-badge { 
+            background: linear-gradient(45deg, #ff0055, #ff5500); color: white; 
+            font-weight: 900; font-style: italic; padding: 5px 15px; border-radius: 20px;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.5); transform: skew(-10deg);
+        }
+
+        /* Result Viewers */
+        .viewer-code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #3c3c3c;
+            position: relative;
+        }
+        .viewer-code::before {
+            content: '● ● ●';
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 10px;
+            color: #555;
+            letter-spacing: 2px;
+        }
+        .viewer-doc {
+            background-color: #ffffff;
+            color: #333333;
+            padding: 2rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-family: 'Noto Sans KR', serif;
+            line-height: 1.8;
+            min-height: 200px;
+        }
+        .viewer-image {
+            background-color: #000;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            border: 1px solid #333;
+        }
+
         /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
@@ -99,7 +157,7 @@
                     <div class="flex gap-2">
                         <button onclick="setLevel(1)" id="tab-lv1" class="level-tab active">Lv.1 초급</button>
                         <button onclick="setLevel(2)" id="tab-lv2" class="level-tab inactive">Lv.2 중급</button>
-                        <button onclick="setLevel(3)" id="tab-lv3" class="level-tab inactive">Lv.3 고급</button>
+                        <button onclick="setLevel(3)" id="tab-lv3" class="level-tab inactive">Lv.3 Battle</button>
                     </div>
                 </div>
                 
@@ -133,11 +191,32 @@
             <!-- Simulation Result -->
             <div class="card min-h-[200px]">
                 <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                    <h3 class="text-lg font-bold text-white"><i class="fas fa-robot text-purple-400 mr-2"></i> AI 응답 시뮬레이션</h3>
+                    <h3 class="text-lg font-bold text-white"><i class="fas fa-robot text-purple-400 mr-2"></i> AI 생성 결과 (Simulation)</h3>
                     <span id="sim-status" class="text-xs text-gray-500">대기 중</span>
                 </div>
-                <div id="sim-output" class="text-gray-300 text-sm leading-relaxed markdown-body">
-                    프롬프트를 전송하면 이곳에 AI의 예상 응답이 표시됩니다.
+                <!-- Battle Score Area (Hidden by default) -->
+                <div id="battle-result" class="hidden mb-4 p-4 bg-gray-900 rounded-lg border border-gray-700">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-400 text-xs">Human Score</span>
+                        <div class="vs-badge text-xs">VS</div>
+                        <span class="text-[#a3e635] text-xs">AI Score</span>
+                    </div>
+                    <div class="relative h-4 bg-gray-700 rounded-full overflow-hidden">
+                        <div id="human-bar" class="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                        <div id="ai-bar" class="absolute top-0 right-0 h-full bg-[#a3e635] transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-1 text-xs font-mono">
+                        <span id="human-score-text">0</span>
+                        <span id="battle-verdict" class="font-bold text-white">CALCULATING...</span>
+                        <span id="ai-score-text">0</span>
+                    </div>
+                </div>
+
+                <!-- Result Container -->
+                <div id="result-container" class="w-full">
+                     <div id="sim-output" class="text-gray-300 text-sm leading-relaxed markdown-body min-h-[100px] font-mono">
+                        프롬프트를 전송하면 이곳에 AI의 생성 결과가 표시됩니다.
+                    </div>
                 </div>
             </div>
         </div>
@@ -241,7 +320,7 @@
             window.addEventListener('resize', () => { if(currentLevel===1) drawMindMapLines(); });
         };
 
-        // --- CHART.JS IMPLEMENTATION (Fixed) ---
+        // --- CHART.JS IMPLEMENTATION ---
         function initDKT() {
             const ctx = document.getElementById('dktChart').getContext('2d');
             dktChartInst = new Chart(ctx, {
@@ -275,10 +354,8 @@
 
         function updateDKT(newScore) {
             if (!dktChartInst) return;
-            
             dktScores.push(newScore);
             const labels = dktScores.map((_, i) => i === 0 ? 'Start' : `Try ${i}`);
-            
             dktChartInst.data.labels = labels;
             dktChartInst.data.datasets[0].data = dktScores;
             dktChartInst.update();
@@ -300,6 +377,11 @@
             const dData = domainData[domain];
             document.getElementById('current-domain-badge').innerHTML = `<i class="fas ${dData.icon} mr-1"></i> ${dData.name}`;
             
+            // Reset Simulation Area Style based on domain
+            const simOutput = document.getElementById('sim-output');
+            simOutput.innerHTML = "프롬프트를 전송하면 이곳에 AI의 생성 결과가 표시됩니다.";
+            simOutput.className = "text-gray-300 text-sm leading-relaxed markdown-body min-h-[100px] font-mono";
+
             renderUI();
         }
 
@@ -320,10 +402,13 @@
                 }
             }
             
-            const titles = ["구조화 가이드 (Scaffolding)", "템플릿 활용 (Template)", "자유 작성 (Free Mode)"];
+            const titles = ["구조화 가이드 (Scaffolding)", "템플릿 활용 (Template)", "⚔️ Human vs AI (Battle Mode)"];
             document.getElementById('level-title').innerText = titles[lv-1];
             document.getElementById('level-indicator').innerText = lv;
 
+            // Reset Battle Area
+            document.getElementById('battle-result').classList.add('hidden');
+            
             renderUI();
         }
 
@@ -359,7 +444,6 @@
                 submitText.innerText = "가이드를 완료해주세요";
                 editBtn.classList.remove('hidden');
                 input.readOnly = true;
-                
                 renderMindMap(content);
                 updateGuideBubble();
             } 
@@ -370,7 +454,6 @@
                 submitText.innerText = "템플릿 기반 생성";
                 editBtn.classList.add('hidden'); // Auto-editable
                 input.readOnly = false;
-                
                 const tpl = domainData[currentDomain].template;
                 content.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-center p-6">
@@ -385,20 +468,21 @@
                     </div>
                 `;
             } 
-            // Level 3: Free Mode
+            // Level 3: Battle Mode (Human vs AI)
             else {
                 bubble.classList.add('hidden');
                 submitBtn.disabled = false;
-                submitText.innerText = "의도 파악 및 생성";
+                submitText.innerText = "⚔️ AI와 대결하기";
                 editBtn.classList.add('hidden');
                 input.readOnly = false;
-                input.placeholder = "자유롭게 프롬프트를 작성해보세요. AI가 의도를 파악하고 최적화합니다.";
+                input.placeholder = "자유롭게 프롬프트를 작성하세요. AI가 최적화된 프롬프트와 대결을 신청합니다.";
 
                 content.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-center p-6 opacity-50">
-                        <i class="fas fa-keyboard text-6xl text-gray-700 mb-4"></i>
-                        <h3 class="text-lg font-bold text-gray-500">Free Mode</h3>
-                        <p class="text-sm text-gray-600">제약 없이 자유롭게 작성하세요.<br>AI가 PECS 기준에 맞춰 분석합니다.</p>
+                    <div class="flex flex-col items-center justify-center h-full text-center p-6 battle-card">
+                        <div class="vs-badge text-2xl mb-4 animate-pulse">Human vs AI</div>
+                        <h3 class="text-lg font-bold text-white mb-2">프롬프트 배틀 모드</h3>
+                        <p class="text-sm text-gray-400">당신의 프롬프트 vs AI가 최적화한 프롬프트</p>
+                        <p class="text-xs text-gray-500 mt-2">누가 더 PECS 점수가 높을까요? 승리하면 AI가 당신의 프롬프트로 응답합니다.</p>
                     </div>
                 `;
             }
@@ -411,19 +495,16 @@
             area.innerHTML = `
                 <div class="mindmap-wrapper relative flex justify-between items-start h-full p-4 overflow-x-auto gap-4">
                     <svg id="mindmap-svg" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;"></svg>
-                    
                     <!-- Col 1: Role -->
                     <div class="mindmap-col z-10 focus-col" id="col-1-wrap">
                         <span class="text-[#a3e635] text-xs font-bold mb-2 text-center bg-gray-900/80 rounded p-1 border border-gray-700">1. 역할 (Who)</span>
                         <div id="col-role" class="flex flex-col gap-2"></div>
                     </div>
-
                     <!-- Col 2: Context -->
                     <div class="mindmap-col z-10 blur-col" id="col-2-wrap">
                         <span class="text-[#a3e635] text-xs font-bold mb-2 text-center bg-gray-900/80 rounded p-1 border border-gray-700">2. 상황 (Context)</span>
                         <div id="col-context" class="flex flex-col gap-2"></div>
                     </div>
-
                     <!-- Col 3: Format -->
                     <div class="mindmap-col z-10 blur-col" id="col-3-wrap">
                         <span class="text-[#a3e635] text-xs font-bold mb-2 text-center bg-gray-900/80 rounded p-1 border border-gray-700">3. 형식 (Format)</span>
@@ -467,7 +548,6 @@
                     fmtCol.appendChild(el);
                 });
             }
-            
             setTimeout(drawMindMapLines, 100);
         }
 
@@ -480,10 +560,9 @@
                 currentSelection.format = value; currentSelection.formatIdx = idx;
             }
             updatePrompt();
-            renderScaffolding(); // Re-render for visual feedback
+            renderScaffolding(); 
         }
 
-        // Added wrapper to keep logic clean since renderScaffolding is just calling renderUI in this simplified version
         function renderScaffolding() {
             renderMindMap(document.getElementById('scaffolding-content'));
             updateGuideBubble();
@@ -511,7 +590,6 @@
         function updatePrompt() {
             const {role, context, format} = currentSelection;
             const tpl = domainData[currentDomain].template;
-            
             let text = tpl
                 .replace('[역할]', role || '[역할]')
                 .replace('[역할/스타일]', role || '[스타일]')
@@ -521,7 +599,6 @@
                 .replace('[형식]', format || '[형식]')
                 .replace('[형식/조명/구도]', format || '[세부사항]')
                 .replace('[형식/제약사항]', format || '[조건]');
-
             document.getElementById('user-input').value = text;
         }
 
@@ -553,109 +630,274 @@
                     svg.appendChild(path);
                 });
             };
-
             if(currentSelection.role) draw(`node-role-${currentSelection.roleIdx}`, 'node-ctx-');
             if(currentSelection.context) draw(`node-ctx-${currentSelection.contextIdx}`, 'node-fmt-');
         }
 
-        // --- SUBMIT & SIMULATION (Fixed) ---
+        // --- SUBMIT & SIMULATION LOGIC ---
         function submitPrompt() {
             const text = document.getElementById('user-input').value;
             if(!text) return;
 
             const btn = document.getElementById('submit-btn');
+            const simOutput = document.getElementById('sim-output');
+            
             btn.classList.remove('animate-bounce');
             btn.disabled = true;
-            document.getElementById('sim-status').innerText = "처리 중...";
+            document.getElementById('sim-status').innerText = "생성 중...";
             document.getElementById('feedback-loading').classList.remove('hidden');
 
+            // Reset Output for Streaming
+            simOutput.innerHTML = "";
+            
+            // Battle Mode Logic (Level 3)
+            if (currentLevel === 3) {
+                runBattleSimulation(text);
+                return;
+            }
+
+            // Normal Mode Logic
             setTimeout(() => {
-                // Feedback Logic
                 const score = Math.floor(Math.random() * 15) + 85;
                 updateDKT(score);
+                addHistory(score, text);
                 
-                // Add to history
-                const historyList = document.getElementById('history-list');
-                const historyItem = document.createElement('div');
-                historyItem.className = 'p-2 bg-gray-800 rounded border border-gray-700';
-                historyItem.innerHTML = `<span class="text-[#a3e635] font-bold">${score}점</span> <span class="text-gray-400 text-xs truncate">${new Date().toLocaleTimeString()} - ${text.substring(0, 20)}...</span>`;
-                
-                if(historyList.children[0] && historyList.children[0].innerText === "기록 없음") {
-                    historyList.innerHTML = '';
-                }
-                historyList.prepend(historyItem);
-
                 document.getElementById('score-badge').innerText = `${score}점`;
                 document.getElementById('score-badge').classList.remove('hidden');
                 document.getElementById('feedback-loading').classList.add('hidden');
                 
-                let feedbackHTML = `<div class="p-2 bg-gray-800 rounded border border-gray-600 mb-2">
-                    <strong class="text-[#a3e635] text-xs">PECS 분석 결과</strong>
-                    <div class="grid grid-cols-2 gap-2 mt-1 text-xs text-gray-300">
-                        <div>🎯 목표(Goal): <span class="text-blue-400">명확함</span></div>
-                        <div>🌍 맥락(Context): <span class="text-blue-400">구체적</span></div>
+                document.getElementById('feedback-content').innerHTML = `
+                    <div class="p-2 bg-gray-800 rounded border border-gray-600 mb-2">
+                        <strong class="text-[#a3e635] text-xs">PECS 분석 결과</strong>
+                        <div class="grid grid-cols-2 gap-2 mt-1 text-xs text-gray-300">
+                            <div>🎯 목표: <span class="text-blue-400">명확함</span></div>
+                            <div>🌍 맥락: <span class="text-blue-400">구체적</span></div>
+                        </div>
                     </div>
-                </div>`;
-                
-                if(currentLevel === 3) {
-                     feedbackHTML += `<p class="text-xs text-gray-400">자유 입력된 프롬프트에서 <strong>${domainData[currentDomain].name}</strong> 의도가 감지되었습니다. PECS 요소 중 '지시(Instructions)'가 명확합니다.</p>`;
-                } else {
-                     feedbackHTML += `<p class="font-bold text-white text-sm">훌륭한 구조입니다!</p><p class="text-xs text-gray-400 mt-1">PECS 가이드를 통해 프롬프트의 <strong>형식(Format)</strong>과 <strong>지시(Instructions)</strong>가 잘 정의되었습니다.</p>`;
-                }
-                document.getElementById('feedback-content').innerHTML = feedbackHTML;
+                    <p class="font-bold text-white text-sm">훌륭한 구조입니다!</p>
+                `;
 
-                // Simulation Output Generation (Fixed)
-                let simResult = "";
-                if(currentDomain === 'text') {
-                    simResult = `
-#### 🤖 AI 응답 예시
-안녕하세요! 요청하신 **${currentSelection.role || '전문가'}**의 입장에서 작성한 초안입니다.
-
-> **${currentSelection.context || '요청하신 주제'}**
->
-> 요즘 이 주제에 대해 고민이 많으시군요. ${currentSelection.format ? currentSelection.format + ' 스타일로' : '요청하신 대로'} 핵심 내용을 정리해 보았습니다.
-> 1. 첫 번째 포인트: 독자의 공감을 이끌어내는 오프닝
-> 2. 두 번째 포인트: 구체적인 해결책 제시
-> 3. 마무리: 행동을 유도하는 결론 (Call to Action)
-
-추가적인 수정 사항이 있으시면 말씀해 주세요!`;
-                } else if(currentDomain === 'image') {
-                    simResult = `
-#### 🎨 이미지 생성 완료
-*(시뮬레이션: 고화질 이미지 렌더링 결과)*
-
-**[이미지 설명]**
-- **스타일**: ${currentSelection.role || '고화질'} 화풍
-- **주제**: ${currentSelection.context || '풍경'}
-- **세부사항**: ${currentSelection.format || '기본 조명'}
-
-이미지가 생성되었습니다. 마음에 들지 않으시면 '다시 생성'을 눌러 변형(Variation)을 시도해보세요.`;
-                } else {
-                    simResult = `
-#### 💻 코드 생성 결과
-\`\`\`python
-# 요청하신 ${currentSelection.context || '기능'} 구현 코드입니다.
-# 역할: ${currentSelection.role || '개발자'}
-
-def main():
-    print("Initializing process...")
-    # ${currentSelection.format || '최적화된 로직'} 적용
-    data = process_data()
-    return data
-
-if __name__ == "__main__":
-    main()
-\`\`\`
-코드가 작성되었습니다. 실행 전 의존성 패키지를 확인해주세요.`;
-                }
-
-                document.getElementById('sim-output').innerHTML = marked.parse(simResult);
-                document.getElementById('sim-status').innerText = "완료";
-                btn.disabled = false;
+                // Render based on domain
+                renderDomainResult(text, false);
 
             }, 1500);
+        }
+
+        // --- BATTLE MODE SIMULATION ---
+        function runBattleSimulation(userPrompt) {
+            const feedbackLoading = document.getElementById('feedback-loading');
+            const battleResult = document.getElementById('battle-result');
+            const humanBar = document.getElementById('human-bar');
+            const aiBar = document.getElementById('ai-bar');
+            
+            // 1. Show Analyzing UI
+            document.getElementById('feedback-content').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="animate-pulse text-[#a3e635] font-bold">⚠️ AI가 도전을 수락했습니다!</div>
+                    <p class="text-xs text-gray-500 mt-2">프롬프트 구조를 분석하고 있습니다...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                feedbackLoading.classList.add('hidden');
+                battleResult.classList.remove('hidden');
+
+                // 2. Random Scores
+                const humanScore = Math.floor(Math.random() * 20) + 70; // 70-90
+                const aiScore = Math.floor(Math.random() * 10) + 88;    // 88-98
+                
+                // Animate Bars
+                setTimeout(() => {
+                    humanBar.style.width = `${humanScore}%`;
+                    aiBar.style.width = `${aiScore}%`;
+                    document.getElementById('human-score-text').innerText = humanScore;
+                    document.getElementById('ai-score-text').innerText = aiScore;
+
+                    const verdict = document.getElementById('battle-verdict');
+                    const winner = humanScore >= aiScore ? "HUMAN WIN!" : "AI WIN!";
+                    verdict.innerText = winner;
+                    verdict.className = humanScore >= aiScore ? "font-bold text-blue-400" : "font-bold text-[#a3e635]";
+                    
+                    updateDKT(humanScore);
+                    addHistory(humanScore, userPrompt + " (Battle)");
+                    document.getElementById('score-badge').innerText = `${humanScore}점`;
+                    document.getElementById('score-badge').classList.remove('hidden');
+
+                }, 500);
+
+                // 3. Show Winner's Output
+                setTimeout(() => {
+                    const simOutput = document.getElementById('sim-output');
+                    let promptToUse = userPrompt;
+                    let message = "";
+                    
+                    if (humanScore >= aiScore) {
+                        message = `<div class='mb-2 text-[#a3e635] font-bold'>🏆 Human Victory! 당신의 프롬프트로 생성합니다.</div>`;
+                    } else {
+                        message = `<div class='mb-2 text-blue-400 font-bold'>🤖 AI Victory! AI 최적화 프롬프트로 생성합니다.</div>`;
+                        // AI optimize prompt simulation
+                        promptToUse += " detailed, high quality, step-by-step";
+                    }
+                    
+                    document.getElementById('sim-status').innerText = "생성 중...";
+                    const resultContainer = document.getElementById('sim-output');
+                    resultContainer.innerHTML = message;
+                    
+                    // Render Result
+                    renderDomainResult(promptToUse, true); // Append mode
+
+                }, 2000);
+
+            }, 1500);
+        }
+
+        // --- DOMAIN SPECIFIC RENDERING ---
+        function renderDomainResult(prompt, append = false) {
+            const container = document.getElementById('sim-output');
+            const btn = document.getElementById('submit-btn');
+
+            if (!append) container.innerHTML = ""; // Clear if not appending
+
+            if (currentDomain === 'image') {
+                // 🖼️ IMAGE DOMAIN: Real AI Generation
+                const promptEncoded = encodeURIComponent(prompt);
+                const imageUrl = `https://image.pollinations.ai/prompt/${promptEncoded}`;
+                
+                const imgContainer = document.createElement('div');
+                imgContainer.className = "viewer-image";
+                imgContainer.innerHTML = `<div class="text-center"><i class="fas fa-spinner fa-spin text-3xl text-gray-500 mb-2"></i><p class="text-xs text-gray-500">AI가 이미지를 그리고 있습니다...</p></div>`;
+                container.appendChild(imgContainer);
+
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    imgContainer.innerHTML = "";
+                    img.className = "max-w-full h-auto rounded fade-in";
+                    img.style.animation = "fadeIn 1s";
+                    imgContainer.appendChild(img);
+                    document.getElementById('sim-status').innerText = "완료";
+                    btn.disabled = false;
+                };
+                img.onerror = () => {
+                    imgContainer.innerHTML = `<p class="text-red-500">이미지 생성 실패. 다시 시도해주세요.</p>`;
+                    btn.disabled = false;
+                }
+
+            } else if (currentDomain === 'text') {
+                // 📝 TEXT DOMAIN: Document Viewer
+                const docContainer = document.createElement('div');
+                docContainer.className = "viewer-doc mt-2";
+                container.appendChild(docContainer);
+                
+                const response = generateTextResponse(prompt);
+                typeWriterEffect(docContainer, response, true); // true for markdown parsing
+
+            } else if (currentDomain === 'code') {
+                // 💻 CODE DOMAIN: IDE Viewer
+                const codeContainer = document.createElement('div');
+                codeContainer.className = "viewer-code mt-2";
+                codeContainer.innerHTML = `<div class="text-xs text-gray-500 mb-2 border-b border-gray-700 pb-1 ml-12">main.py</div><div id="code-content"></div>`;
+                container.appendChild(codeContainer);
+                
+                const response = generateCodeResponse(prompt);
+                const codeContent = codeContainer.querySelector('#code-content');
+                typeWriterEffect(codeContent, response, false); // false for raw text (colored later if needed, but simple for now)
+            }
+        }
+
+        function generateTextResponse(input) {
+            const keywords = input.split(' ').filter(w => w.length > 1).slice(0, 3).join(', ');
+            return `## 📄 요청하신 내용 초안
+
+**주제**: ${keywords || '입력하신 주제'}
+
+서론:
+최근 ${keywords}에 대한 관심이 높아지고 있습니다. 이에 대한 체계적인 접근이 필요합니다.
+
+본론:
+1. **중요성**: 이 주제는 현대 사회에서 핵심적인 역할을 합니다.
+2. **해결 방안**: 구체적인 데이터와 사례를 통해 문제를 해결할 수 있습니다. 예를 들어, 효율성을 30% 이상 증대시킬 수 있습니다.
+3. **적용점**: 실무에 바로 적용 가능한 3가지 팁을 제안합니다.
+
+결론:
+요약하자면, 지속적인 관심과 실행이 변화를 만듭니다.
+
+---
+*AI가 ${new Date().toLocaleDateString()}에 생성함*`;
+        }
+
+        function generateCodeResponse(input) {
+            return `import pandas as pd
+import numpy as np
+
+def process_data(data):
+    """
+    ${input.substring(0, 10)}... 처리를 위한 함수
+    """
+    print("Initializing AI core...")
+    
+    # 데이터 전처리
+    df = pd.DataFrame(data)
+    df = df.dropna()
+    
+    # 분석 로직 실행
+    result = df.describe()
+    return result
+
+if __name__ == "__main__":
+    # 실행 예시
+    raw_data = load_dataset()
+    print("Processing started...")
+    final_output = process_data(raw_data)
+    print("Done.")`;
+        }
+
+        function typeWriterEffect(element, text, isMarkdown) {
+            let i = 0;
+            element.innerHTML = "";
+            element.classList.add('font-mono', 'whitespace-pre-wrap', 'text-sm'); 
+            
+            function type() {
+                if (i < text.length) {
+                    let char = text.charAt(i);
+                    element.innerHTML += char === '\n' ? '<br>' : char;
+                    i++;
+                    element.scrollTop = element.scrollHeight;
+                    setTimeout(type, Math.random() * 15 + 5); 
+                } else {
+                    document.getElementById('sim-status').innerText = "완료";
+                    document.getElementById('submit-btn').disabled = false;
+                    
+                    if(isMarkdown) {
+                         element.innerHTML = marked.parse(text);
+                         element.classList.remove('font-mono', 'whitespace-pre-wrap');
+                    } else {
+                        // Simple Syntax Highlighting simulation for code
+                        let html = element.innerHTML;
+                        html = html.replace(/def /g, '<span class="text-purple-400">def </span>');
+                        html = html.replace(/import /g, '<span class="text-purple-400">import </span>');
+                        html = html.replace(/return /g, '<span class="text-purple-400">return </span>');
+                        html = html.replace(/print/g, '<span class="text-yellow-300">print</span>');
+                        html = html.replace(/".*?"/g, '<span class="text-green-400">$&</span>');
+                        html = html.replace(/#.*/g, '<span class="text-gray-500">$&</span>');
+                        element.innerHTML = html;
+                    }
+                }
+            }
+            type();
+        }
+
+        function addHistory(score, text) {
+            const historyList = document.getElementById('history-list');
+            const historyItem = document.createElement('div');
+            historyItem.className = 'p-2 bg-gray-800 rounded border border-gray-700';
+            historyItem.innerHTML = `<span class="text-[#a3e635] font-bold">${score}점</span> <span class="text-gray-400 text-xs truncate block">${new Date().toLocaleTimeString()} - ${text.substring(0, 15)}...</span>`;
+            
+            if(historyList.children[0] && historyList.children[0].innerText === "기록 없음") {
+                historyList.innerHTML = '';
+            }
+            historyList.prepend(historyItem);
         }
     </script>
 </body>
 </html>
-
